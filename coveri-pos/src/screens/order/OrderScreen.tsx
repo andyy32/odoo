@@ -130,6 +130,12 @@ export function OrderScreen() {
           <Button variant="ghost" onClick={() => navigate('/')}>
             Floor
           </Button>
+          <Button variant="ghost" disabled={lines.length === 0} onClick={() => navigate(`/bill/${order.id}`)}>
+            Bill
+          </Button>
+          <Button variant="ghost" disabled={lines.length === 0} onClick={() => navigate(`/table/${tableId}/pay`)}>
+            Pay
+          </Button>
           <Button
             variant="primary"
             disabled={pendingFireCount(table?.table_number ?? '') === 0 && !justFired}

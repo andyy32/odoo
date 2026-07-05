@@ -157,7 +157,7 @@
 }
 .order-foot__actions {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: auto auto auto 1.5fr;
   gap: var(--space-2);
 }
 

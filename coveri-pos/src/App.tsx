@@ -3,6 +3,8 @@ import './app/shell.css';
 import { FloorScreen } from './screens/floor/FloorScreen';
 import { KitchenScreen } from './screens/kitchen/KitchenScreen';
 import { OrderScreen } from './screens/order/OrderScreen';
+import { PaymentScreen } from './screens/pay/PaymentScreen';
+import { ReceiptScreen } from './screens/receipt/ReceiptScreen';
 import { StyleGuide } from './screens/styleguide/StyleGuide';
 
 export function App() {
@@ -32,6 +34,9 @@ export function App() {
         <Routes>
           <Route path="/" element={<FloorScreen />} />
           <Route path="/table/:tableId" element={<OrderScreen />} />
+          <Route path="/table/:tableId/pay" element={<PaymentScreen />} />
+          <Route path="/bill/:orderId" element={<ReceiptScreen kind="bill" />} />
+          <Route path="/receipt/:orderId" element={<ReceiptScreen kind="receipt" />} />
           <Route path="/kitchen" element={<KitchenScreen />} />
           <Route path="/styleguide" element={<StyleGuide />} />
         </Routes>
