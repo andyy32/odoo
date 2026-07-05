@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import './app/shell.css';
 import { FloorScreen } from './screens/floor/FloorScreen';
-import { TableScreen } from './screens/table/TableScreen';
+import { OrderScreen } from './screens/order/OrderScreen';
 import { StyleGuide } from './screens/styleguide/StyleGuide';
 
 export function App() {
@@ -22,7 +22,7 @@ export function App() {
 
         <Routes>
           <Route path="/" element={<FloorScreen />} />
-          <Route path="/table/:tableId" element={<TableScreen />} />
+          <Route path="/table/:tableId" element={<OrderScreen />} />
           <Route path="/styleguide" element={<StyleGuide />} />
         </Routes>
       </div>
