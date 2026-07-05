@@ -1,0 +1,150 @@
+/* COVERI POS — floor plan screen */
+
+.floor-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.floor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-5) var(--space-3);
+  flex-wrap: wrap;
+}
+
+.floor-tabs {
+  display: flex;
+  gap: var(--space-2);
+  flex: 1;
+  overflow-x: auto;
+}
+.floor-tab {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.floor-tab--active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* The scrollable canvas the tables live on. */
+.floor-canvas-wrap {
+  flex: 1;
+  overflow: auto;
+  margin: 0 var(--space-5) var(--space-5);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.045) 1px, transparent 0) 0 0 / 20px 20px,
+    var(--surface);
+}
+.floor-canvas {
+  position: relative;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.floor-table {
+  position: absolute;
+  touch-action: none;
+}
+.floor-table .table-tile {
+  width: 100%;
+  height: 100%;
+}
+.floor-table--editing .table-tile {
+  cursor: grab;
+  box-shadow: 0 0 0 1.5px var(--divider) inset;
+}
+.floor-table--dragging {
+  z-index: 10;
+}
+.floor-table--dragging .table-tile {
+  cursor: grabbing;
+  box-shadow: 0 0 0 2px var(--accent) inset, var(--shadow);
+}
+
+.floor-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--text-tertiary);
+  padding: var(--space-7);
+  text-align: center;
+}
+
+.floor-status {
+  padding: var(--space-6);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.floor-status--error {
+  color: #ff8a80;
+}
+
+/* Edit-panel rows */
+.edit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+.edit-row + .edit-row {
+  border-top: 1px solid var(--divider);
+}
+.edit-row__label {
+  color: var(--text-secondary);
+}
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.stepper__value {
+  min-width: 2ch;
+  text-align: center;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.stepper__btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: var(--text-h3);
+}
+.seg {
+  display: inline-flex;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+.seg__opt {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+.seg__opt--on {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .floor-canvas-wrap {
+    margin: 0 var(--space-3) var(--space-3);
+  }
+  .floor-toolbar {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+}
