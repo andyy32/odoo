@@ -1,0 +1,124 @@
+/*
+ * COVERI POS — Design Tokens
+ * Service, Simplified. Editorial-luxury, dark-first.
+ *
+ * All visual decisions flow from these variables. Screens never hard-code a
+ * color, radius, or timing — they reference tokens so the brand stays coherent.
+ */
+
+:root,
+:root[data-theme='dark'] {
+  /* ---- Surfaces ---- */
+  --bg: #121212; /* Matte Black — app background */
+  --surface: #1e1e1e; /* Charcoal — cards, panels */
+  --surface-2: #262626; /* raised charcoal — nested cards, inputs */
+  --surface-3: #2f2f2f; /* hover / pressed surface */
+  --divider: rgba(255, 255, 255, 0.08); /* clean hairline dividers, not borders */
+  --overlay: rgba(0, 0, 0, 0.6); /* scrim behind slide panels */
+
+  /* ---- Accent (use sparingly) ---- */
+  --accent: #d96a1b; /* Deep Burnt Orange */
+  --accent-strong: #e2782c; /* hover */
+  --accent-press: #bf5a14; /* active */
+  --accent-soft: rgba(217, 106, 27, 0.14); /* tinted backgrounds, active tables */
+  --on-accent: #1a1206; /* text/icon on top of accent fills */
+
+  /* ---- Status ---- */
+  --success: #2e7d32; /* Forest Green */
+  --success-soft: rgba(46, 125, 50, 0.16);
+  --warning: #f4a300; /* Amber */
+  --warning-soft: rgba(244, 163, 0, 0.16);
+  --error: #c62828; /* Deep Red */
+  --error-soft: rgba(198, 40, 40, 0.16);
+
+  /* ---- Text ---- */
+  --text: #f5f5f5; /* primary */
+  --text-secondary: #b5b5b5; /* soft grey secondary */
+  --text-tertiary: #7d7d7d; /* captions, disabled */
+  --text-on-accent: var(--on-accent);
+
+  /* ---- Typography ---- */
+  --font-sans: 'Inter', 'Geist', 'SF Pro Display', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-numeric: var(--font-sans);
+
+  /* Editorial type scale (fluid where it helps legibility from a distance) */
+  --text-display: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  --text-h1: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --text-h2: 1.375rem;
+  --text-h3: 1.125rem;
+  --text-body: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --leading-tight: 1.1;
+  --leading-normal: 1.4;
+  --tracking-tight: -0.02em; /* editorial headings */
+
+  /* ---- Radius (12–16px signature roundness) ---- */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+
+  /* ---- Spacing (8pt base) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ---- Touch ---- */
+  --touch-min: 48px; /* minimum interactive hit target */
+
+  /* ---- Elevation (subtle, only where depth aids meaning) ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+
+  /* ---- Motion (fast, 60fps, never slows service) ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  /* ---- Layout ---- */
+  --z-panel: 100;
+  --z-overlay: 90;
+  --z-toast: 200;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/*
+ * Light theme scaffold — dark ships first, but the token layer is theme-ready.
+ * Only surface/text tokens flip; the accent and status hues stay brand-true.
+ */
+:root[data-theme='light'] {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --surface-2: #f0f0f0;
+  --surface-3: #e6e6e6;
+  --divider: rgba(0, 0, 0, 0.08);
+  --overlay: rgba(0, 0, 0, 0.35);
+  --on-accent: #ffffff;
+  --text: #141414;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #8a8a8a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
+}
