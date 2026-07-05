@@ -38,12 +38,15 @@ export function OrderScreen() {
     setGuests,
     setEditingLine,
     totals,
+    pendingFireCount,
+    fireOrder,
   } = useOrderStore();
 
   const [categoryId, setCategoryId] = useState<UUID | 'all'>('all');
   const [search, setSearch] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [guestsOpen, setGuestsOpen] = useState(false);
+  const [justFired, setJustFired] = useState(false);
 
   // Floor data may not be loaded on a direct URL hit.
   useEffect(() => {
@@ -127,8 +130,23 @@ export function OrderScreen() {
           <Button variant="ghost" onClick={() => navigate('/')}>
             Floor
           </Button>
-          <Button variant="primary" disabled={lines.length === 0}>
-            Fire to Kitchen
+          <Button
+            variant="primary"
+            disabled={pendingFireCount(table?.table_number ?? '') === 0 && !justFired}
+            onClick={() => {
+              void fireOrder(table?.table_number ?? '').then((n) => {
+                if (n > 0) {
+                  setJustFired(true);
+                  setTimeout(() => setJustFired(false), 2000);
+                }
+              });
+            }}
+          >
+            {justFired
+              ? 'Fired ✓'
+              : pendingFireCount(table?.table_number ?? '') > 0
+                ? `Fire to Kitchen (${pendingFireCount(table?.table_number ?? '')})`
+                : 'Fire to Kitchen'}
           </Button>
         </div>
       </div>

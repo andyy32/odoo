@@ -16,8 +16,10 @@ import {
   updateLine,
   updateOrder,
 } from '@/data/orderRepo';
+import { insertTickets } from '@/data/kitchenRepo';
+import { computePrepDelta, nextSnapshot, type FireableLine } from '@/lib/prep';
 import { computeOrderTotals, type OrderTotals } from '@/lib/tax';
-import type { PosOrder, PosOrderLine, Product, UUID } from '@/types/db';
+import type { KitchenTicket, PosOrder, PosOrderLine, Product, UUID } from '@/types/db';
 
 function newId(): UUID {
   return crypto.randomUUID();
@@ -41,6 +43,10 @@ interface OrderState {
   setGuests: (count: number) => Promise<void>;
   setEditingLine: (lineId: UUID | null) => void;
   totals: () => OrderTotals;
+  /** Count of not-yet-fired changes (drives the Fire button badge). */
+  pendingFireCount: (tableNumber: string) => number;
+  /** Fire pending changes to their prep stations. Returns tickets fired. */
+  fireOrder: (tableNumber: string) => Promise<number>;
   reset: () => void;
 }
 
@@ -179,6 +185,47 @@ export const useOrderStore = create<OrderState>((set, get) => {
       );
     },
 
+    pendingFireCount: () => {
+      const delta = computePrepDelta(fireableLines(get().lines, get().catalog), get().order?.prep_snapshot ?? []);
+      return delta.reduce((n, t) => n + t.items.length, 0);
+    },
+
+    fireOrder: async (tableNumber) => {
+      const { order, lines, catalog } = get();
+      if (!order || !catalog) return 0;
+      const fireable = fireableLines(lines, catalog);
+      const delta = computePrepDelta(fireable, order.prep_snapshot ?? []);
+      if (delta.length === 0) return 0;
+
+      const tickets: KitchenTicket[] = delta.map((t) => ({
+        id: crypto.randomUUID(),
+        company_id: order.company_id,
+        order_id: order.id,
+        table_number: tableNumber,
+        station: t.station,
+        items: t.items,
+        done: false,
+        fired_at: new Date().toISOString(),
+      }));
+      const snapshot = nextSnapshot(fireable);
+
+      set({ order: { ...order, prep_snapshot: snapshot } });
+      await insertTickets(tickets);
+      await updateOrder(order.id, { prep_snapshot: snapshot });
+      return tickets.length;
+    },
+
     reset: () => set({ order: null, lines: [], editingLineId: null, error: null }),
   };
 });
+
+/** Map order lines to the prep engine's shape (station comes from the product). */
+function fireableLines(lines: PosOrderLine[], catalog: Catalog | null): FireableLine[] {
+  return lines.map((l) => ({
+    id: l.id,
+    name: l.full_product_name,
+    qty: Number(l.qty),
+    note: l.note ?? null,
+    station: (l.product_id && catalog?.products.find((p) => p.id === l.product_id)?.prep_station) || null,
+  }));
+}

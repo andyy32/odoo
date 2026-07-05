@@ -130,11 +130,29 @@ export interface PosOrderLine {
 
 /** One entry in an order's kitchen snapshot — used by the change-delta engine. */
 export interface PrepSnapshotEntry {
-  product_id: UUID;
+  lineId: UUID;
   name: string;
   qty: number;
   note: string | null;
-  station: string | null;
+  station: string;
+}
+
+export interface KitchenTicketItem {
+  kind: 'add' | 'cancel' | 'note';
+  name: string;
+  qty: number;
+  note: string | null;
+}
+
+export interface KitchenTicket {
+  id: UUID;
+  company_id: UUID;
+  order_id: UUID | null;
+  table_number: string;
+  station: string;
+  items: KitchenTicketItem[];
+  done: boolean;
+  fired_at: string;
 }
 
 export interface PosPaymentMethod {

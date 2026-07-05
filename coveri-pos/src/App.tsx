@@ -1,6 +1,7 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
 import './app/shell.css';
 import { FloorScreen } from './screens/floor/FloorScreen';
+import { KitchenScreen } from './screens/kitchen/KitchenScreen';
 import { OrderScreen } from './screens/order/OrderScreen';
 import { StyleGuide } from './screens/styleguide/StyleGuide';
 
@@ -15,6 +16,14 @@ export function App() {
             </span>
             <span className="brand__tag">Service, Simplified.</span>
           </Link>
+          <nav className="topbar__nav">
+            <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link nav-link--on' : 'nav-link')}>
+              Floor
+            </NavLink>
+            <NavLink to="/kitchen" className={({ isActive }) => (isActive ? 'nav-link nav-link--on' : 'nav-link')}>
+              Kitchen
+            </NavLink>
+          </nav>
           <div className="topbar__session">
             <span className="dot" /> Register open
           </div>
@@ -23,6 +32,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<FloorScreen />} />
           <Route path="/table/:tableId" element={<OrderScreen />} />
+          <Route path="/kitchen" element={<KitchenScreen />} />
           <Route path="/styleguide" element={<StyleGuide />} />
         </Routes>
       </div>

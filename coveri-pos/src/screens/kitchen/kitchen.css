@@ -1,0 +1,133 @@
+/* COVERI POS — Kitchen Display (KDS): the live ticket wall. */
+
+.kds {
+  flex: 1;
+  padding: 0 var(--space-5) var(--space-5);
+  overflow-y: auto;
+}
+.kds__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+  align-content: start;
+}
+.kds__empty {
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: var(--space-8) var(--space-5);
+  font-size: var(--text-h3);
+}
+
+.ticket {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: ticket-in var(--dur-normal) var(--ease-out);
+}
+@keyframes ticket-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticket {
+    animation: none;
+  }
+}
+
+.ticket__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+.ticket__table {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+.ticket__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.ticket__station {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: var(--weight-semibold);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.ticket__age {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.ticket--late .ticket__age {
+  color: var(--warning);
+  font-weight: var(--weight-semibold);
+}
+
+.ticket__items {
+  padding: 0 var(--space-4);
+  border-top: 1px solid var(--divider);
+}
+.titem {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  align-items: baseline;
+}
+.titem + .titem {
+  border-top: 1px solid var(--divider);
+}
+.titem__qty {
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5ch;
+}
+.titem__body {
+  flex: 1;
+  min-width: 0;
+}
+.titem__name {
+  font-weight: var(--weight-medium);
+}
+.titem__note {
+  font-size: var(--text-sm);
+  color: var(--accent);
+}
+.titem--cancel .titem__name {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+.titem--cancel .titem__qty {
+  color: var(--error);
+}
+.titem__tag {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+.ticket__bump {
+  margin: var(--space-3) var(--space-4) var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .kds {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+}
