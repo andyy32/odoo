@@ -1,0 +1,99 @@
+/* COVERI POS — register (session) screen. */
+
+.reg {
+  flex: 1;
+  padding: 0 var(--space-5) var(--space-6);
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.reg__panel {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.reg__title {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+.reg__sub {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.reg__amount {
+  text-align: right;
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-4);
+}
+
+.reg__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+.stat {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+}
+.stat__label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-1);
+}
+.stat__value {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-tight);
+}
+
+.reg__rows .rrow {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  color: var(--text-secondary);
+}
+.reg__rows .rrow + .rrow {
+  border-top: 1px solid var(--divider);
+}
+.rrow b {
+  color: var(--text);
+}
+.rrow--good {
+  color: var(--success) !important;
+}
+.rrow--bad {
+  color: var(--error) !important;
+}
+
+.reg__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.reg__actions > * {
+  flex: 1;
+  min-width: 140px;
+}
+
+@media (max-width: 640px) {
+  .reg {
+    padding: 0 var(--space-3) var(--space-4);
+  }
+}

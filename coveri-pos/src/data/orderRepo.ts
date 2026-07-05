@@ -50,7 +50,13 @@ export async function updateOrder(
   patch: Partial<
     Pick<
       PosOrder,
-      'customer_count' | 'amount_subtotal' | 'amount_tax' | 'amount_total' | 'state' | 'prep_snapshot'
+      | 'customer_count'
+      | 'amount_subtotal'
+      | 'amount_tax'
+      | 'amount_total'
+      | 'state'
+      | 'prep_snapshot'
+      | 'session_id'
     >
   >,
 ): Promise<void> {

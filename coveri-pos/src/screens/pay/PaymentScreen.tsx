@@ -8,6 +8,7 @@ import { cx } from '@/lib/cx';
 import { formatMoney } from '@/lib/money';
 import { useFloorStore } from '@/stores/floorStore';
 import { useOrderStore } from '@/stores/orderStore';
+import { useSessionStore } from '@/stores/sessionStore';
 import type { PosPayment, PosPaymentMethod, UUID } from '@/types/db';
 
 interface PayLine {
@@ -29,6 +30,8 @@ export function PaymentScreen() {
   const loadFloor = useFloorStore((s) => s.load);
   const table = useFloorStore((s) => s.tables.find((t) => t.id === tableId));
   const { order, lines, loading, openForTable, totals, reset } = useOrderStore();
+  const session = useSessionStore((s) => s.session);
+  const sessionLoading = useSessionStore((s) => s.loading);
 
   const [methods, setMethods] = useState<PosPaymentMethod[]>([]);
   const [selected, setSelected] = useState<PosPaymentMethod | null>(null);
@@ -96,7 +99,7 @@ export function PaymentScreen() {
         return { id: l.id, order_id: order.id, method_id: l.method.id, amount };
       });
       await insertPayments(rows.filter((r) => r.amount > 0));
-      await updateOrder(order.id, { state: 'paid' });
+      await updateOrder(order.id, { state: 'paid', session_id: session?.id ?? null });
       const orderId = order.id;
       reset();
       void loadFloor(); // frees the table on the floor plan
@@ -113,7 +116,22 @@ export function PaymentScreen() {
       </div>
     );
   }
-  if (loading || !order) return <div className="pay-status">Loading payment…</div>;
+  if (loading || !order || sessionLoading) return <div className="pay-status">Loading payment…</div>;
+  if (!session) {
+    return (
+      <div className="pay-status">
+        The register is closed — open it before taking payments.
+        <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--space-2)', justifyContent: 'center' }}>
+          <Button variant="ghost" onClick={() => navigate(`/table/${tableId}`)}>
+            Back
+          </Button>
+          <Button variant="primary" onClick={() => navigate('/register')}>
+            Open Register
+          </Button>
+        </div>
+      </div>
+    );
+  }
   if (lines.length === 0) {
     return (
       <div className="pay-status">

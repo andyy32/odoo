@@ -69,6 +69,12 @@
   background: var(--success);
   display: inline-block;
 }
+.dot--off {
+  background: var(--text-tertiary);
+}
+a.topbar__session {
+  text-decoration: none;
+}
 @media (max-width: 640px) {
   .brand__tag {
     display: none;
