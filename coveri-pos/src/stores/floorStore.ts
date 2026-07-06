@@ -63,6 +63,7 @@ export const useFloorStore = create<FloorState>((set, get) => ({
         activeFloorId: s.activeFloorId ?? data.floors[0]?.id ?? null,
       }));
     } catch (e) {
+      console.error('[floor] load failed:', e);
       set({ loading: false, error: e instanceof Error ? e.message : String(e) });
     }
   },

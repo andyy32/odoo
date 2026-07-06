@@ -2,11 +2,14 @@
  * COVERI POS — data repository.
  *
  * Thin, typed data-access layer over Supabase. Screens talk to this module
- * (via stores), never to supabase-js directly, so the Phase-7 offline queue
- * can slot in underneath without touching UI code.
+ * (via stores), never to supabase-js directly. Writes go through the offline
+ * sync queue (persisted, replayed in order); bulk reads are network-first
+ * with an IndexedDB fallback so the app renders after an offline reload.
  */
 
 import { supabase } from '@/lib/supabase';
+import { cachedRead } from '@/lib/cachedRead';
+import { enqueueMutation } from '@/lib/syncQueue';
 import type {
   PosConfig,
   PosOrder,
@@ -24,27 +27,28 @@ export interface FloorData {
 }
 
 export async function loadFloorData(): Promise<FloorData> {
-  const [cfgRes, floorsRes, tablesRes, ordersRes] = await Promise.all([
-    supabase.from('pos_config').select('*').limit(1).maybeSingle(),
-    supabase.from('restaurant_floor').select('*').order('sequence'),
-    supabase.from('restaurant_table').select('*').eq('active', true),
-    supabase.from('pos_order').select('*').eq('state', 'draft'),
-  ]);
-
-  const firstError = cfgRes.error ?? floorsRes.error ?? tablesRes.error ?? ordersRes.error;
-  if (firstError) throw new Error(`Failed to load floor data: ${firstError.message}`);
+  const raw = await cachedRead('floorData', async () => {
+    const [cfgRes, floorsRes, tablesRes, ordersRes] = await Promise.all([
+      supabase.from('pos_config').select('*').limit(1).maybeSingle(),
+      supabase.from('restaurant_floor').select('*').order('sequence'),
+      supabase.from('restaurant_table').select('*').eq('active', true),
+      supabase.from('pos_order').select('*').eq('state', 'draft'),
+    ]);
+    const firstError = cfgRes.error ?? floorsRes.error ?? tablesRes.error ?? ordersRes.error;
+    if (firstError) throw new Error(`Failed to load floor data: ${firstError.message}`);
+    return {
+      config: (cfgRes.data as PosConfig | null) ?? null,
+      floors: (floorsRes.data ?? []) as RestaurantFloor[],
+      tables: (tablesRes.data ?? []) as RestaurantTable[],
+      draftOrders: (ordersRes.data ?? []) as PosOrder[],
+    };
+  });
 
   const draftOrdersByTable = new Map<UUID, PosOrder>();
-  for (const o of (ordersRes.data ?? []) as PosOrder[]) {
+  for (const o of raw.draftOrders) {
     if (o.table_id) draftOrdersByTable.set(o.table_id, o);
   }
-
-  return {
-    config: (cfgRes.data as PosConfig | null) ?? null,
-    floors: (floorsRes.data ?? []) as RestaurantFloor[],
-    tables: (tablesRes.data ?? []) as RestaurantTable[],
-    draftOrdersByTable,
-  };
+  return { config: raw.config, floors: raw.floors, tables: raw.tables, draftOrdersByTable };
 }
 
 /** Persist a table's geometry/attributes (edit mode). */
@@ -57,20 +61,20 @@ export async function updateTable(
     >
   >,
 ): Promise<void> {
-  const { error } = await supabase.from('restaurant_table').update(patch).eq('id', id);
-  if (error) throw new Error(`Failed to update table: ${error.message}`);
+  await enqueueMutation({
+    table: 'restaurant_table',
+    kind: 'update',
+    payload: patch,
+    match: { column: 'id', value: id },
+  });
 }
 
 export async function createTable(
   table: Omit<RestaurantTable, 'id' | 'active' | 'color'> & Partial<Pick<RestaurantTable, 'color'>>,
 ): Promise<RestaurantTable> {
-  const { data, error } = await supabase
-    .from('restaurant_table')
-    .insert(table)
-    .select()
-    .single();
-  if (error) throw new Error(`Failed to create table: ${error.message}`);
-  return data as RestaurantTable;
+  const row: RestaurantTable = { id: crypto.randomUUID(), active: true, color: '#262626', ...table };
+  await enqueueMutation({ table: 'restaurant_table', kind: 'insert', payload: row });
+  return row;
 }
 
 /**

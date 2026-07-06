@@ -72,6 +72,19 @@
 .dot--off {
   background: var(--text-tertiary);
 }
+.sync-badge {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.sync-badge--offline {
+  background: rgba(244, 163, 0, 0.14);
+  color: var(--warning);
+}
 a.topbar__session {
   text-decoration: none;
 }

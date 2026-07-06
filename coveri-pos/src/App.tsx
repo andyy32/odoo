@@ -9,7 +9,21 @@ import { PaymentScreen } from './screens/pay/PaymentScreen';
 import { ReceiptScreen } from './screens/receipt/ReceiptScreen';
 import { RegisterScreen } from './screens/register/RegisterScreen';
 import { StyleGuide } from './screens/styleguide/StyleGuide';
+import { initSync, useSyncStore } from './lib/syncQueue';
 import { useSessionStore } from './stores/sessionStore';
+
+initSync();
+
+function SyncBadge() {
+  const online = useSyncStore((s) => s.online);
+  const pending = useSyncStore((s) => s.pending);
+  if (online && pending === 0) return null;
+  return (
+    <span className={cx('sync-badge', !online && 'sync-badge--offline')} role="status">
+      {online ? `Syncing ${pending}…` : `Offline${pending > 0 ? ` · ${pending} pending` : ''}`}
+    </span>
+  );
+}
 
 function TopbarSession() {
   const session = useSessionStore((s) => s.session);
@@ -43,6 +57,7 @@ export function App() {
               Kitchen
             </NavLink>
           </nav>
+          <SyncBadge />
           <TopbarSession />
         </header>
 

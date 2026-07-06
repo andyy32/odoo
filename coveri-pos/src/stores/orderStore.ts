@@ -9,6 +9,7 @@
 import { create } from 'zustand';
 import { loadCatalog, type Catalog } from '@/data/catalogRepo';
 import {
+  cacheDraftOrder,
   createDraftOrder,
   deleteLine,
   insertLine,
@@ -103,6 +104,7 @@ export const useOrderStore = create<OrderState>((set, get) => {
         }
         set({ loading: false, catalog, order: data.order, lines: data.lines });
       } catch (e) {
+        console.error('[order] openForTable failed:', e);
         set({ loading: false, error: e instanceof Error ? e.message : String(e) });
       }
     },
@@ -217,6 +219,14 @@ export const useOrderStore = create<OrderState>((set, get) => {
 
     reset: () => set({ order: null, lines: [], editingLineId: null, error: null }),
   };
+});
+
+// Keep the per-table draft cache coherent with every optimistic edit, so an
+// offline reload restores exactly what the waiter last saw.
+useOrderStore.subscribe((s) => {
+  if (s.order?.table_id) {
+    cacheDraftOrder(s.order.table_id, { order: s.order, lines: s.lines });
+  }
 });
 
 /** Map order lines to the prep engine's shape (station comes from the product). */

@@ -22,6 +22,9 @@ export const supabase: SupabaseClient = createClient(
   url ?? 'http://localhost:54321',
   anonKey ?? 'public-anon-key-placeholder',
   {
-    auth: { persistSession: true, autoRefreshToken: true },
+    // Anon-key usage only (cashier auth comes later): disable the session
+    // machinery entirely. Its Navigator-locks bookkeeping can stall every
+    // REST call when the app boots offline.
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   },
 );

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './pay.css';
 import { Button, Numpad } from '@/components/primitives';
-import { insertPayments, loadPaymentMethods } from '@/data/paymentRepo';
-import { updateOrder } from '@/data/orderRepo';
+import { cacheOrderDocument, insertPayments, loadPaymentMethods } from '@/data/paymentRepo';
+import { cacheDraftOrder, updateOrder } from '@/data/orderRepo';
 import { cx } from '@/lib/cx';
 import { formatMoney } from '@/lib/money';
 import { useFloorStore } from '@/stores/floorStore';
@@ -98,8 +98,17 @@ export function PaymentScreen() {
         }
         return { id: l.id, order_id: order.id, method_id: l.method.id, amount };
       });
-      await insertPayments(rows.filter((r) => r.amount > 0));
+      const finalRows = rows.filter((r) => r.amount > 0);
+      await insertPayments(finalRows);
       await updateOrder(order.id, { state: 'paid', session_id: session?.id ?? null });
+      // Local copies so the receipt renders and the table reads free even if
+      // this payment happened offline (rows still in the sync queue).
+      cacheOrderDocument({
+        order: { ...order, state: 'paid', session_id: session?.id ?? null },
+        lines,
+        payments: finalRows,
+      });
+      if (order.table_id) cacheDraftOrder(order.table_id, null);
       const orderId = order.id;
       reset();
       void loadFloor(); // frees the table on the floor plan

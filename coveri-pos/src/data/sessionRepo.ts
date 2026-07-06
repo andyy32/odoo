@@ -3,6 +3,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { enqueueMutation } from '@/lib/syncQueue';
 import type { PosOrder, PosPayment, PosSession, UUID } from '@/types/db';
 
 export interface CashMove {
@@ -32,21 +33,24 @@ export async function openSession(session: {
   config_id: UUID;
   opening_cash: number;
 }): Promise<void> {
-  const { error } = await supabase.from('pos_session').insert({ ...session, state: 'opened' });
-  if (error) throw new Error(`Failed to open register: ${error.message}`);
+  await enqueueMutation({
+    table: 'pos_session',
+    kind: 'insert',
+    payload: { ...session, state: 'opened', opened_at: new Date().toISOString() },
+  });
 }
 
 export async function closeSession(id: UUID, closingCash: number): Promise<void> {
-  const { error } = await supabase
-    .from('pos_session')
-    .update({ state: 'closed', closing_cash: closingCash, closed_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) throw new Error(`Failed to close register: ${error.message}`);
+  await enqueueMutation({
+    table: 'pos_session',
+    kind: 'update',
+    payload: { state: 'closed', closing_cash: closingCash, closed_at: new Date().toISOString() },
+    match: { column: 'id', value: id },
+  });
 }
 
 export async function addCashMove(move: CashMove): Promise<void> {
-  const { error } = await supabase.from('pos_cash_move').insert(move);
-  if (error) throw new Error(`Failed to record cash move: ${error.message}`);
+  await enqueueMutation({ table: 'pos_cash_move', kind: 'insert', payload: move });
 }
 
 export async function loadCashMoves(sessionId: UUID): Promise<CashMove[]> {
