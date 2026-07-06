@@ -73,6 +73,7 @@ export async function createDraftOrder(order: {
   company_id: UUID;
   table_id: UUID;
   customer_count: number;
+  waiter_id?: UUID | null;
 }): Promise<void> {
   await enqueueMutation({
     table: 'pos_order',

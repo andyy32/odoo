@@ -18,6 +18,7 @@ import {
   updateOrder,
 } from '@/data/orderRepo';
 import { insertTickets } from '@/data/kitchenRepo';
+import { useAuthStore } from '@/stores/authStore';
 import { computePrepDelta, nextSnapshot, type FireableLine } from '@/lib/prep';
 import { computeOrderTotals, type OrderTotals } from '@/lib/tax';
 import type { KitchenTicket, PosOrder, PosOrderLine, Product, UUID } from '@/types/db';
@@ -79,12 +80,13 @@ export const useOrderStore = create<OrderState>((set, get) => {
         const catalog = get().catalog ?? (await loadCatalog());
         let data = await loadDraftOrder(tableId);
         if (!data) {
+          const waiterId = useAuthStore.getState().staff?.id ?? null;
           const order: PosOrder = {
             id: newId(),
             company_id: companyId,
             session_id: null,
             table_id: tableId,
-            waiter_id: null,
+            waiter_id: waiterId,
             customer_count: Math.max(1, defaultGuests),
             state: 'draft',
             prep_snapshot: [],
@@ -99,6 +101,7 @@ export const useOrderStore = create<OrderState>((set, get) => {
             company_id: companyId,
             table_id: tableId,
             customer_count: order.customer_count,
+            waiter_id: waiterId,
           });
           data = { order, lines: [] };
         }

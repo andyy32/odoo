@@ -43,16 +43,26 @@ offline queue drains exactly once (no duplicates).
 - **URL:** `https://bagbuauhyvawaopzoinc.supabase.co`
 - **Publishable (anon) key:** `sb_publishable_XiCLfhjWIoHabizwqNq-sQ_cLQwW7UY`
   (ships in the client bundle by design; row access is meant to be governed by RLS — but see the warning below).
-- **Schema:** `supabase/migrations/0001–0005` (companies, staff, config, sessions, floors/tables,
-  catalog + taxes, orders/lines, payments, kitchen tickets, cash moves). All applied to the live project.
+- **Schema:** `supabase/migrations/0001–0006` (companies, staff, config, sessions, floors/tables,
+  catalog + taxes, orders/lines, payments, kitchen tickets, cash moves, staff PIN RPC). All applied.
 - **Realtime:** publication covers `restaurant_table`, `pos_order`, `pos_order_line`, `kitchen_ticket`.
 - **Seed data:** COVERI Demo Bistro — 2 floors, 12 tables, 17-item menu, VAT 10%, Cash + Card (manual).
 
-> ⚠️ **TESTING-ONLY SECURITY POSTURE.** Migrations `0003` + parts of `0004/0005` add a
-> temporary `anon`-role allow-all policy on every table so the app works without a login flow.
-> **Anyone with the URL + publishable key can read/write this database.** Fine for demo data;
-> drop these `*_dev_anon` policies the moment cashier auth ships (Roadmap item #1), and never
-> point this at real business data before then.
+### Auth (Phase 8) — login credentials
+- **Owner login (email + password):** `owner@coveri.app` / `CoveriDemo2026!` — role `admin`.
+  **Change this password** in the Supabase dashboard (Authentication → Users) before real use.
+- **Staff PINs** (shared-terminal identity): Owner `4321`, **Sam** (waiter) `1234`, **Jordan**
+  (manager) `5678`. Waiters can take orders; managers/admin additionally see **Settings**.
+- Flow: owner signs in once → picks a staff identity by PIN → that stamps `waiter_id` on orders and
+  `opened_by` on register sessions. "Switch user" re-locks to the PIN screen; "Sign out" ends the
+  Supabase session.
+
+> ⚠️ **DATABASE IS STILL OPEN — lockdown is the last step of Phase 8.** Migrations `0003`/`0004`/`0005`
+> added temporary `anon` allow-all policies so the app worked before login existed. Auth is now built
+> and verified, but the `*_dev_anon` policies are **still in place** until the owner confirms login
+> works on the live Vercel deploy — dropping them before a confirmed login would lock everyone out.
+> **Next action:** owner logs in on the live site → confirms → then apply `0007_lockdown` (DROP all
+> `*_dev_anon`). Until then, anyone with the URL+key can still read/write. Don't use real data yet.
 
 ## 4. Run locally
 

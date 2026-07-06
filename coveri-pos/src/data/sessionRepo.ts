@@ -32,6 +32,7 @@ export async function openSession(session: {
   company_id: UUID;
   config_id: UUID;
   opening_cash: number;
+  opened_by?: UUID | null;
 }): Promise<void> {
   await enqueueMutation({
     table: 'pos_session',

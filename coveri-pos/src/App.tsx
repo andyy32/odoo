@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Link, NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import './app/shell.css';
 import { cx } from './lib/cx';
 import { FloorScreen } from './screens/floor/FloorScreen';
@@ -8,8 +8,12 @@ import { OrderScreen } from './screens/order/OrderScreen';
 import { PaymentScreen } from './screens/pay/PaymentScreen';
 import { ReceiptScreen } from './screens/receipt/ReceiptScreen';
 import { RegisterScreen } from './screens/register/RegisterScreen';
+import { SettingsScreen } from './screens/settings/SettingsScreen';
+import { LoginScreen } from './screens/auth/LoginScreen';
+import { StaffLockScreen } from './screens/auth/StaffLockScreen';
 import { StyleGuide } from './screens/styleguide/StyleGuide';
 import { initSync, useSyncStore } from './lib/syncQueue';
+import { useAuthStore } from './stores/authStore';
 import { useSessionStore } from './stores/sessionStore';
 
 initSync();
@@ -38,7 +42,50 @@ function TopbarSession() {
   );
 }
 
+/** Current staff chip → lock (switch user) / sign out menu. */
+function UserChip() {
+  const { staff, lock, signOut } = useAuthStore();
+  const [open, setOpen] = useState(false);
+  if (!staff) return null;
+  return (
+    <div className="userchip">
+      <button className="userchip__btn" onClick={() => setOpen((o) => !o)}>
+        <span className="userchip__avatar">{staff.name.charAt(0).toUpperCase()}</span>
+        <span className="userchip__name">{staff.name}</span>
+      </button>
+      {open && (
+        <>
+          <div className="userchip__scrim" onClick={() => setOpen(false)} />
+          <div className="userchip__menu">
+            <div className="userchip__role">{staff.role}</div>
+            <button className="userchip__item" onClick={() => { setOpen(false); lock(); }}>
+              Switch user
+            </button>
+            <button className="userchip__item" onClick={() => { setOpen(false); void signOut(); }}>
+              Sign out
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+const isManager = (role?: string) => role === 'manager' || role === 'admin';
+
 export function App() {
+  const { ready, session, staff, init } = useAuthStore();
+
+  useEffect(() => {
+    void init();
+  }, [init]);
+
+  if (!ready) return null; // brief; avoids a login flash before session restores
+
+  // Auth gate: no session → login; signed in but no staff identity → lock screen.
+  if (!session) return <LoginScreen />;
+  if (!staff) return <StaffLockScreen />;
+
   return (
     <BrowserRouter>
       <div className="shell">
@@ -56,9 +103,15 @@ export function App() {
             <NavLink to="/kitchen" className={({ isActive }) => (isActive ? 'nav-link nav-link--on' : 'nav-link')}>
               Kitchen
             </NavLink>
+            {isManager(staff.role) && (
+              <NavLink to="/settings" className={({ isActive }) => (isActive ? 'nav-link nav-link--on' : 'nav-link')}>
+                Settings
+              </NavLink>
+            )}
           </nav>
           <SyncBadge />
           <TopbarSession />
+          <UserChip />
         </header>
 
         <Routes>
@@ -69,6 +122,10 @@ export function App() {
           <Route path="/receipt/:orderId" element={<ReceiptScreen kind="receipt" />} />
           <Route path="/kitchen" element={<KitchenScreen />} />
           <Route path="/register" element={<RegisterScreen />} />
+          <Route
+            path="/settings/*"
+            element={isManager(staff.role) ? <SettingsScreen /> : <Navigate to="/" replace />}
+          />
           <Route path="/styleguide" element={<StyleGuide />} />
         </Routes>
       </div>

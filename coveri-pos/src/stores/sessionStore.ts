@@ -13,6 +13,7 @@ import {
   openSession,
   type CashMove,
 } from '@/data/sessionRepo';
+import { useAuthStore } from '@/stores/authStore';
 import type { PosPaymentMethod, PosSession } from '@/types/db';
 
 export interface SessionReport {
@@ -57,11 +58,12 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     // The register belongs to the (single) pos_config of this company.
     const { config } = await loadFloorData();
     if (!config) throw new Error('No register configured');
+    const openedBy = useAuthStore.getState().staff?.id ?? null;
     const session: PosSession = {
       id: crypto.randomUUID(),
       company_id: config.company_id,
       config_id: config.id,
-      opened_by: null,
+      opened_by: openedBy,
       state: 'opened',
       opening_cash: openingCash,
       closing_cash: null,
@@ -73,6 +75,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       company_id: config.company_id,
       config_id: config.id,
       opening_cash: openingCash,
+      opened_by: openedBy,
     });
     set({ session });
   },

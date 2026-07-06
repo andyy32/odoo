@@ -22,9 +22,16 @@ export const supabase: SupabaseClient = createClient(
   url ?? 'http://localhost:54321',
   anonKey ?? 'public-anon-key-placeholder',
   {
-    // Anon-key usage only (cashier auth comes later): disable the session
-    // machinery entirely. Its Navigator-locks bookkeeping can stall every
-    // REST call when the app boots offline.
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    auth: {
+      // Cashier auth (Phase 8): persist the owner's session across reloads.
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      // Opt OUT of the Web Locks API. supabase-js otherwise wraps token work in
+      // navigator.locks, whose bookkeeping stalled the first REST calls on an
+      // offline boot (found in Phase 7). A no-op lock just runs the callback.
+      lock: async (_name, _acquireTimeout, fn) => fn(),
+    },
   },
 );
