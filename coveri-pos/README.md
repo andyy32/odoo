@@ -6,6 +6,8 @@ A fresh, standalone reimplementation of a restaurant POS (React + TypeScript + S
 using Odoo's open-source POS purely as a functional blueprint. This is a **clean-room** build:
 no Odoo source is copied; the code here is original.
 
+**📋 Status, Vercel deployment & roadmap: see [ROADMAP.md](./ROADMAP.md).**
+
 ## Stack
 
 - **Frontend:** React 18 + TypeScript, Vite, PWA (offline-ready), Framer Motion for micro-animations.
