@@ -4,11 +4,15 @@
   display: flex;
   flex-direction: column;
   padding-top: var(--safe-top);
+  /* Nothing may push a horizontal scrollbar — the page must never spill right. */
+  max-width: 100%;
+  overflow-x: hidden;
 }
 .topbar {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--space-4);
   padding: var(--space-5) var(--space-5) var(--space-4);
 }
@@ -165,5 +169,17 @@ a.topbar__session {
   }
   .topbar {
     padding: var(--space-4) var(--space-3) var(--space-3);
+    row-gap: var(--space-3);
+  }
+  /* Floor/Kitchen drop to a full-width second row that scrolls if it can't fit,
+     so the header never forces the page wider than the viewport. */
+  .topbar__nav {
+    order: 10;
+    width: 100%;
+    margin: 0;
+    overflow-x: auto;
+  }
+  .brand__mark {
+    font-size: var(--text-h2);
   }
 }
